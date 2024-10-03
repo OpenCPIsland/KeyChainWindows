@@ -48,6 +48,12 @@ Once installed, ensure that Visual Studio is configured to use this SDK by check
    - Select **Build** → **Build Solution** (or press `Ctrl+Shift+B`).
    - The output DLL file will be created in the `Debug` or `Release` folder, depending on your selected configuration.
 
+5. **Place the DLL in the Client Directory**:
+   - After building the DLL, locate the outputted file in your build directory.
+   - Place the DLL in your custom-built Club Penguin Island client directory:
+     - Navigate to your **CP Island_Data/Plugins/x86_64/** folder.
+     - Copy the outputted DLL into this folder.
+
 ## 4. Target Architecture
 
 Ensure that you are building the DLL for the correct target architecture:
@@ -73,5 +79,6 @@ In summary, to build this DLL, ensure you have:
 2. Installed the **latest Windows SDK**.
 3. Configured the build settings in Visual Studio for the correct architecture and SDK.
 4. Successfully built the project using the provided instructions.
+5. After the DLL is built, place the outputted DLL into your custom Club Penguin Island client directory **CP Island_Data/Plugins/x86_64/** folder.
 
 This document serves as the primary reference for setting up and building the DLL.
