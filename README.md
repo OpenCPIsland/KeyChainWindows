@@ -12,7 +12,8 @@ This project is a **fan-made recreation** of the `KeyChainWindows.dll`, which is
 
 To build the `KeyChainWindows.dll`, you will need:
 
-- **Visual Studio 2022** with the **Desktop development with C++** workload installed.  
+- **Visual Studio 2022** with the **Desktop development with C++** workload installed, including **v143 build tools**.
+  - Ensure that the **MSVC v143 - VS 2022 C++ x64/x86 build tools (Latest)** are selected during installation.
   [Download Visual Studio 2022](https://visualstudio.microsoft.com/downloads/)
   
 - The latest version of the **Windows SDK**.  
@@ -22,7 +23,7 @@ Ensure that Visual Studio is configured to use the correct Windows SDK version a
 
 ## Build Instructions
 
-For detailed setup instructions and steps to build the `KeyChainWindows.dll`, refer to the [instructions.md](https://github.com/CP-Island-Localhost-Server/KeyChainWindows/blob/main/instructions.md) file.
+For detailed setup instructions and steps to build the `KeyChainWindows.dll`, including how to ensure the **v143 tools** are selected, refer to the [instructions.md](https://github.com/CP-Island-Localhost-Server/KeyChainWindows/blob/main/instructions.md) file.
 
 ## Target Architecture
 
@@ -36,6 +37,16 @@ The architecture can be set in Visual Studio using the **Solution Platforms** dr
 ## Troubleshooting
 
 If you encounter any issues during the build process, refer to the [instructions.md](https://github.com/CP-Island-Localhost-Server/KeyChainWindows/blob/main/instructions.md) for troubleshooting tips and more detailed guidance.
+
+## Join the Discussion on Discord
+
+You can join the community and get further support or discuss the project on the **Discord server**:
+
+<a href="https://discord.gg/Qpt9Cbukhx">
+    <img src="https://logos-world.net/wp-content/uploads/2020/12/Discord-Logo.png" alt="Discord" width="100">
+</a>
+
+- **Join here**: [https://discord.gg/Qpt9Cbukhx](https://discord.gg/Qpt9Cbukhx)
 
 ## Credits
 
