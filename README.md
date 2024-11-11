@@ -1,6 +1,6 @@
-# KeyChainWindows.dll for Club Penguin Island Offline Mode
+# KeyChainWindows.dll and MemoryMonitorWindows.dll for Club Penguin Island Offline Mode
 
-This project is a **fan-made recreation** of the `KeyChainWindows.dll`, which is used for encrypting and managing player data in offline mode for **Club Penguin Island**. This DLL enables secure data encryption and decryption, making it essential for players using the custom-built offline version of the game.
+This project is a **fan-made recreation** of the `KeyChainWindows.dll` and `MemoryMonitorWindows.dll`, which is used for encrypting and managing player data in offline mode for **Club Penguin Island**. This DLL enables secure data encryption and decryption, making it essential for players using the custom-built offline version of the game.
 
 ## Features
 
@@ -10,7 +10,7 @@ This project is a **fan-made recreation** of the `KeyChainWindows.dll`, which is
 
 ## Project Requirements
 
-To build the `KeyChainWindows.dll`, you will need:
+To build the `KeyChainWindows.dll` and `MemoryMonitorWindows.dll`, you will need:
 
 - **Visual Studio 2022** with the **Desktop development with C++** workload installed, including **v143 build tools**.
   - Ensure that the **MSVC v143 - VS 2022 C++ x64/x86 build tools (Latest)** are selected during installation.
@@ -23,7 +23,7 @@ Ensure that Visual Studio is configured to use the correct Windows SDK version a
 
 ## Build Instructions
 
-For detailed setup instructions and steps to build the `KeyChainWindows.dll`, including how to ensure the **v143 tools** are selected, refer to the [instructions.md](https://github.com/CP-Island-Localhost-Server/KeyChainWindows/blob/main/instructions.md) file.
+For detailed setup instructions and steps to build the `KeyChainWindows.dll` and `MemoryMonitorWindows.dll`, including how to ensure the **v143 tools** are selected, refer to the [instructions.md](https://github.com/CP-Island-Localhost-Server/KeyChainWindows/blob/main/instructions.md) file.
 
 ## Target Architecture
 
