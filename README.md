@@ -1,6 +1,6 @@
 # KeyChainWindows.dll and MemoryMonitorWindows.dll for Club Penguin Island Offline Mode
 
-This project is a **fan-made recreation** of the `KeyChainWindows.dll` and `MemoryMonitorWindows.dll`, which is used for encrypting and managing player data in offline mode for **Club Penguin Island**. This DLL enables secure data encryption and decryption, making it essential for players using the custom-built offline version of the game.
+This project is a **fan-made recreation** of the `KeyChainWindows.dll` and `MemoryMonitorWindows.dll`, which is used for encrypting and managing player data in offline mode for **Club Penguin Island**. This DLL enables secure data encryption and decryption, making it essential for players using the custom built offline version of the game.
 
 ## Features
 
@@ -23,7 +23,7 @@ Ensure that Visual Studio is configured to use the correct Windows SDK version a
 
 ## Build Instructions
 
-For detailed setup instructions and steps to build the `KeyChainWindows.dll` and `MemoryMonitorWindows.dll`, including how to ensure the **v143 tools** are selected, refer to the [instructions.md](https://github.com/CP-Island-Localhost-Server/KeyChainWindows/blob/main/instructions.md) file.
+For detailed setup instructions and steps to build the `KeyChainWindows.dll` and `MemoryMonitorWindows.dll`, including how to ensure the **v143 tools** are selected, refer to the [instructions.md](https://github.com/OpenCPIsland/KeyChainWindows/blob/main/instructions.md) file.
 
 ## Target Architecture
 
@@ -36,7 +36,7 @@ The architecture can be set in Visual Studio using the **Solution Platforms** dr
 
 ## Troubleshooting
 
-If you encounter any issues during the build process, refer to the [instructions.md](https://github.com/CP-Island-Localhost-Server/KeyChainWindows/blob/main/instructions.md) for troubleshooting tips and more detailed guidance.
+If you encounter any issues during the build process, refer to the [instructions.md](https://github.com/OpenCPIsland/KeyChainWindows/blob/main/instructions.md) for troubleshooting tips and more detailed guidance.
 
 ## Join the Discussion on Discord
 
