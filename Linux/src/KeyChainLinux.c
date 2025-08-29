@@ -3,10 +3,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Simple XOR obfuscation to simulate CryptProtectData / CryptUnprotectData
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+// Simple XOR obfuscation to simulate CryptProtectData / CryptUnprotectData
 
 // _cryptProtectData: input string -> output buffer + size
 __attribute__((visibility("default")))
@@ -14,7 +15,7 @@ int _cryptProtectData(const char* dataIn, int* sizeOut, char** dataOut) {
     if (!dataIn || !sizeOut || !dataOut) return 0;
 
     size_t len = strlen(dataIn);
-    char* buf = (char*)malloc(len);  // malloc works for C# interop
+    char* buf = (char*)malloc(len);  // Caller (C#) must free
     if (!buf) return 0;
 
     for (size_t i = 0; i < len; i++)
@@ -30,7 +31,7 @@ __attribute__((visibility("default")))
 int _cryptUnprotectData(const char* dataIn, int size, char** dataOut) {
     if (!dataIn || !dataOut) return 0;
 
-    char* buf = (char*)malloc(size + 1);  // malloc works for C# interop
+    char* buf = (char*)malloc(size + 1);  // Caller (C#) must free
     if (!buf) return 0;
 
     for (int i = 0; i < size; i++)
@@ -41,7 +42,7 @@ int _cryptUnprotectData(const char* dataIn, int size, char** dataOut) {
     return 1;
 }
 
-// Optional: helper to save a secret to a file
+// Helper to save a secret to a file
 __attribute__((visibility("default")))
 int save_secret(const char* path, const char* secret) {
     if (!path || !secret) return 0;
@@ -52,13 +53,15 @@ int save_secret(const char* path, const char* secret) {
 
     FILE* f = fopen(path, "wb");
     if (!f) { free(protected_data); return 0; }
-    fwrite(protected_data, 1, size, f);
+
+    size_t written = fwrite(protected_data, 1, size, f);
     fclose(f);
     free(protected_data);
-    return 1;
+
+    return written == (size_t)size ? 1 : 0;
 }
 
-// Optional: helper to load a secret from a file
+// Helper to load a secret from a file
 __attribute__((visibility("default")))
 int get_secret(const char* path, char** secretOut) {
     if (!path || !secretOut) return 0;
@@ -75,8 +78,10 @@ int get_secret(const char* path, char** secretOut) {
     char* data = (char*)malloc(size);
     if (!data) { fclose(f); return 0; }
 
-    fread(data, 1, size, f);
+    size_t read = fread(data, 1, size, f);
     fclose(f);
+
+    if (read != (size_t)size) { free(data); return 0; }
 
     int result = _cryptUnprotectData(data, (int)size, secretOut);
     free(data);
