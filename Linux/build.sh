@@ -1,11 +1,10 @@
 #!/bin/bash
-# Build script for libMemoryMonitorLinux.so and libKeyChainLinux.so
-# Installs dependencies if missing, keeps terminal open, outputs build logs
 
 # Log file
 LOG_FILE="build/build.log"
 
-# Ensure build directory exists
+# Start with a clean build directory
+rm -rf build
 mkdir -p build
 
 # Function to check command existence
