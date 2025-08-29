@@ -1,5 +1,5 @@
 #!/bin/bash
-# Build script for MemoryMonitorLinux.so and KeyChainLinux.so
+# Build script for libMemoryMonitorLinux.so and libKeyChainLinux.so
 # Installs dependencies if missing, keeps terminal open, outputs build logs
 
 # Log file
@@ -43,10 +43,10 @@ compile_so() {
 }
 
 # Build MemoryMonitorLinux.so
-compile_so "src/MemoryMonitorLinux.c" "build/MemoryMonitorLinux.so"
+compile_so "src/MemoryMonitorLinux.c" "build/libMemoryMonitorLinux.so"
 
 # Build KeyChainLinux.so
-compile_so "src/KeyChainLinux.c" "build/KeyChainLinux.so"
+compile_so "src/KeyChainLinux.c" "build/libKeyChainLinux.so"
 
 echo "Build complete! .so files are in build/"
 read -p "Press enter to exit..."
