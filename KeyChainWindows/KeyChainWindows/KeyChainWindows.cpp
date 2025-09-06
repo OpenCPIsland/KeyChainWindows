@@ -1,66 +1,81 @@
 // KeyChainWindows.cpp : Defines the exported functions for the DLL.
-//
-
-
 #include "pch.h"
-#include "framework.h"
 #include "KeyChainWindows.h"
 
 #include <windows.h>
 #include <wincrypt.h>
 #include <combaseapi.h>
 #include <errno.h>
+#include <string.h>
 #pragma comment(lib, "Crypt32.lib")
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-// This is an example of an exported function.
-KEYCHAINWINDOWS_API void _cryptProtectData(char* dataIn, size_t* dataOutSize, LPSTR* dataOut)
+// Exported function: protect data
+KEYCHAINWINDOWS_API int _cryptProtectData(const char* dataIn, size_t* sizeOut, char** dataOut)
 {
-    DATA_BLOB pDataIn;
-    DATA_BLOB pDataOut;
-    pDataIn.cbData = strlen(dataIn) + 1;
+    if (!dataIn || !sizeOut || !dataOut) return 0;
+
+    DATA_BLOB pDataIn = {0};
+    DATA_BLOB pDataOut = {0};
+
+    pDataIn.cbData = (DWORD)(strlen(dataIn) + 1);
     pDataIn.pbData = (BYTE*)dataIn;
-    bool result = CryptProtectData(&pDataIn, NULL, NULL, NULL, NULL, 0, &pDataOut);
 
+    if (!CryptProtectData(&pDataIn, NULL, NULL, NULL, NULL, 0, &pDataOut)) {
+        *sizeOut = 0;
+        *dataOut = nullptr;
+        return 0;
+    }
 
-    if (result != 0) {
-        LPSTR _Dst = (LPSTR)CoTaskMemAlloc(pDataOut.cbData);
-        *dataOut = _Dst;
-
-        if (pDataOut.cbData != 0) {
-            if (_Dst != 0) {
-                if (pDataOut.pbData != 0) {
-                    memcpy(_Dst, pDataOut.pbData, pDataOut.cbData);
-                    LocalFree(pDataOut.pbData);
-                    *dataOutSize = pDataOut.cbData;
-                    return;
-                }
-                memset(_Dst, 0, pDataOut.cbData);
-            }
-            errno = EINVAL;
-            _invalid_parameter_noinfo();
-        }
+    char* buf = (char*)CoTaskMemAlloc(pDataOut.cbData);
+    if (!buf) {
         LocalFree(pDataOut.pbData);
-        *dataOutSize = pDataOut.cbData;
-        return;
+        *sizeOut = 0;
+        *dataOut = nullptr;
+        return 0;
     }
-    *dataOutSize = 0;
+
+    memcpy(buf, pDataOut.pbData, pDataOut.cbData);
+    LocalFree(pDataOut.pbData);
+
+    *dataOut = buf;
+    *sizeOut = pDataOut.cbData;
+    return 1;
 }
 
+// Exported function: unprotect data
+KEYCHAINWINDOWS_API int _cryptUnprotectData(const char* dataIn, size_t size, char** dataOut)
+{
+    if (!dataIn || !dataOut || size == 0) return 0;
 
-KEYCHAINWINDOWS_API LPSTR _cryptUnprotectData(BYTE* dataIn, DWORD dataInLength) {
-    DATA_BLOB pDataIn;
-    pDataIn.pbData = dataIn;
-    pDataIn.cbData = dataInLength;
-    DATA_BLOB pDataOut;
-    BOOL protectResult;
+    DATA_BLOB pDataIn = {0};
+    DATA_BLOB pDataOut = {0};
 
+    pDataIn.cbData = (DWORD)size;
+    pDataIn.pbData = (BYTE*)dataIn;
 
-    protectResult = CryptUnprotectData(&pDataIn, NULL, NULL, NULL, NULL, 0, &pDataOut); // weird programming but ok cp team
-
-    if (protectResult != 0) {
-        char* buff = (char*)CoTaskMemAlloc(pDataOut.cbData);
-        strcpy_s(buff, pDataOut.cbData, (char*)pDataOut.pbData);
-        return buff;
+    if (!CryptUnprotectData(&pDataIn, NULL, NULL, NULL, NULL, 0, &pDataOut)) {
+        *dataOut = nullptr;
+        return 0;
     }
+
+    char* buf = (char*)CoTaskMemAlloc(pDataOut.cbData);
+    if (!buf) {
+        LocalFree(pDataOut.pbData);
+        *dataOut = nullptr;
+        return 0;
+    }
+
+    memcpy(buf, pDataOut.pbData, pDataOut.cbData);
+    LocalFree(pDataOut.pbData);
+
+    *dataOut = buf;
+    return 1;
 }
+
+#ifdef __cplusplus
+}
+#endif

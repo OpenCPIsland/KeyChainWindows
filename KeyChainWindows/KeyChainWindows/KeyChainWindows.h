@@ -1,3 +1,5 @@
+#pragma once
+
 // The following ifdef block is the standard way of creating macros which make exporting
 // from a DLL simpler. All files within this DLL are compiled with the KEYCHAINWINDOWS_EXPORTS
 // symbol defined on the command line. This symbol should not be defined on any project
@@ -10,6 +12,23 @@
 #define KEYCHAINWINDOWS_API __declspec(dllimport)
 #endif
 
-// This class is exported from the dll
-extern "C" KEYCHAINWINDOWS_API void _cryptProtectData(char* dataIn, size_t * dataOutSize, LPSTR * dataOut);
-extern "C" KEYCHAINWINDOWS_API LPSTR _cryptUnprotectData(BYTE * dataIn, DWORD dataInLength);
+#include "pch.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// These functions replace the previous _cryptProtectData / _cryptUnprotectData
+// using unique names to avoid C-linkage overload errors
+
+// KC_ProtectData: input string -> output buffer + size
+// Returns 1 on success, 0 on failure
+KEYCHAINWINDOWS_API int KC_ProtectData(const char* dataIn, size_t* dataOutSize, char** dataOut);
+
+// KC_UnprotectData: input buffer + size -> output string
+// Returns 1 on success, 0 on failure
+KEYCHAINWINDOWS_API int KC_UnprotectData(const char* dataIn, size_t dataInLength, char** dataOut);
+
+#ifdef __cplusplus
+}
+#endif
