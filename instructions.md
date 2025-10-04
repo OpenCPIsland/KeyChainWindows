@@ -25,14 +25,14 @@ Download and install the latest version of the Windows SDK from the official Mic
 - [Download Windows SDK](https://developer.microsoft.com/en-us/windows/downloads/windows-sdk/)
 
 Once installed, ensure that Visual Studio is configured to use this SDK by checking the project properties:
-- **Right-click on the project in Visual Studio** → **Properties** → **General** → **Windows SDK Version** → Select the latest SDK version.
+- **Right-click on the project in Visual Studio** -> **Properties** -> **General** -> **Windows SDK Version** -> Select the latest SDK version.
 
 ## 3. Build Instructions
 
 1. **Clone the repository**:
    - If you haven’t already, clone the repository using Git:
      ```bash
-     git clone https://github.com/CP-Island-Localhost-Server/KeyChainWindows.git
+     git clone https://github.com/OpenCPIsland/KeyChainWindows.git
      ```
 
 2. **Open the project in Visual Studio**:
