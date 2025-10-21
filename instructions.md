@@ -2,19 +2,19 @@
 
 This project is aimed at building a Windows Dynamic Link Library (DLL) for **Club Penguin Island Offline Mode**. Please follow the instructions below to ensure your environment is properly set up for building the DLL.
 
-## 1. Visual Studio 2022
+## 1. Visual Studio 2025
 
-You will need **Visual Studio 2022** to build the DLL. You can download it from the official website:
+You will need **Visual Studio 2025** to build the DLL. You can download it from the official website:
 
-- [Download Visual Studio 2022](https://visualstudio.microsoft.com/downloads/)
+- [Download Visual Studio 2025](https://visualstudio.microsoft.com/downloads/)
 
 ### Required Workloads:
 
 During the installation of Visual Studio 2022, make sure to select the following workloads:
 
 - **Desktop development with C++**: This provides the necessary tools for building DLLs and working with Windows desktop applications.
-- Ensure that **v143 build tools** are selected during installation:
-  - In the Visual Studio Installer, under **Individual Components**, make sure **MSVC v143 - VS 2022 C++ x64/x86 build tools (Latest)** is selected.
+- Ensure that **v145 build tools** are selected during installation:
+  - In the Visual Studio Installer, under **Individual Components**, make sure **MSVC v145 - VS 2025 C++ x64/x86 build tools (Latest)** is selected.
 
 ## 2. Latest Windows SDK
 
@@ -38,11 +38,11 @@ Once installed, ensure that Visual Studio is configured to use this SDK by check
 2. **Open the project in Visual Studio**:
    - Navigate to the folder where the repository is located and open the `.sln` file with Visual Studio.
 
-3. **Ensure the v143 Tools are selected**:
+3. **Ensure the v145 Tools are selected**:
    - Check the project’s properties to ensure it is using the **v143 tools** for the build:
      - Right-click the project in the **Solution Explorer**.
      - Go to **Properties** → **Configuration Properties** → **General** → **Platform Toolset**.
-     - Ensure that **Visual Studio 2022 (v143)** is selected.
+     - Ensure that **Visual Studio 2025 (v145)** is selected.
 
 4. **Set the Build Configuration**:
    - Ensure that you have selected the appropriate build configuration:
@@ -82,10 +82,10 @@ If you encounter any issues not covered by this document, please open an issue i
 ### Summary
 
 In summary, to build this DLL, ensure you have:
-1. Installed **Visual Studio 2022** with the required **Desktop development with C++** workload and **v143 build tools**.
+1. Installed **Visual Studio 2025** with the required **Desktop development with C++** workload and **v143 build tools**.
 2. Installed the **latest Windows SDK**.
 3. Configured the build settings in Visual Studio for the correct architecture and SDK.
 4. Successfully built the project using the provided instructions.
-5. After the DLL is built, place the outputted DLL into your custom Club Penguin Island client directory **CP Island_Data/Plugins/x86_64/** folder.
+5. After the DLL is built, place the outputted DLL into your custom Club Penguin Island client directory **CP Island_Data/Plugins/Windows/** folder.
 
 This document serves as the primary reference for setting up and building the DLL.
