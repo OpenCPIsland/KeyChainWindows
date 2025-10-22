@@ -12,8 +12,8 @@ This project is a **fan-made recreation** of the `KeyChainWindows.dll` and `Memo
 
 To build the `KeyChainWindows.dll` and `MemoryMonitorWindows.dll`, you will need:
 
-- **Visual Studio 2025** with the **Desktop development with C++** workload installed, including **v145 build tools**.
-  - Ensure that the **MSVC v145 - VS 2025 C++ x64/x86 build tools (Latest)** are selected during installation.
+- **Visual Studio 2026** with the **Desktop development with C++** workload installed, including **v145 build tools**.
+  - Ensure that the **MSVC v145 - VS 2026 C++ x64/x86 build tools (Latest)** are selected during installation.
   [Download Visual Studio 2022](https://visualstudio.microsoft.com/downloads/)
   
 - The latest version of the **Windows SDK**.  

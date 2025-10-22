@@ -2,11 +2,11 @@
 
 This project is aimed at building a Windows Dynamic Link Library (DLL) for **Club Penguin Island Offline Mode**. Please follow the instructions below to ensure your environment is properly set up for building the DLL.
 
-## 1. Visual Studio 2025
+## 1. Visual Studio 2026
 
-You will need **Visual Studio 2025** to build the DLL. You can download it from the official website:
+You will need **Visual Studio 2026** to build the DLL. You can download it from the official website:
 
-- [Download Visual Studio 2025](https://visualstudio.microsoft.com/downloads/)
+- [Download Visual Studio 2026](https://visualstudio.microsoft.com/downloads/)
 
 ### Required Workloads:
 
@@ -14,7 +14,7 @@ During the installation of Visual Studio 2022, make sure to select the following
 
 - **Desktop development with C++**: This provides the necessary tools for building DLLs and working with Windows desktop applications.
 - Ensure that **v145 build tools** are selected during installation:
-  - In the Visual Studio Installer, under **Individual Components**, make sure **MSVC v145 - VS 2025 C++ x64/x86 build tools (Latest)** is selected.
+  - In the Visual Studio Installer, under **Individual Components**, make sure **MSVC v145 - VS 2026 C++ x64/x86 build tools (Latest)** is selected.
 
 ## 2. Latest Windows SDK
 
@@ -42,7 +42,7 @@ Once installed, ensure that Visual Studio is configured to use this SDK by check
    - Check the project’s properties to ensure it is using the **v143 tools** for the build:
      - Right-click the project in the **Solution Explorer**.
      - Go to **Properties** → **Configuration Properties** → **General** → **Platform Toolset**.
-     - Ensure that **Visual Studio 2025 (v145)** is selected.
+     - Ensure that **Visual Studio 2026 (v145)** is selected.
 
 4. **Set the Build Configuration**:
    - Ensure that you have selected the appropriate build configuration:
@@ -82,7 +82,7 @@ If you encounter any issues not covered by this document, please open an issue i
 ### Summary
 
 In summary, to build this DLL, ensure you have:
-1. Installed **Visual Studio 2025** with the required **Desktop development with C++** workload and **v143 build tools**.
+1. Installed **Visual Studio 2026** with the required **Desktop development with C++** workload and **v143 build tools**.
 2. Installed the **latest Windows SDK**.
 3. Configured the build settings in Visual Studio for the correct architecture and SDK.
 4. Successfully built the project using the provided instructions.
