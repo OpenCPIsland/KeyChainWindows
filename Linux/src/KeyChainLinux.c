@@ -2,98 +2,178 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <openssl/evp.h>
+#include <openssl/rand.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// Protect: input C-string -> outputs protected buffer + length
-// int _cryptProtectData(const char* dataIn, int* sizeOut, char** dataOut)
+#define KEY_FILE "/.local/share/KeyChainLinux/keychain.key"
+
+// Helper to get user key path
+static void get_key_path(char* buf, size_t buf_size) {
+    const char* home = getenv("HOME");
+    if (!home) home = ".";
+    snprintf(buf, buf_size, "%s%s", home, KEY_FILE);
+}
+
+// Load or generate per-user key (32 bytes AES-256)
+static int load_or_generate_key(unsigned char* key) {
+    char path[512];
+    get_key_path(path, sizeof(path));
+
+    FILE* f = fopen(path, "rb");
+    if (f) {
+        size_t read = fread(key, 1, 32, f);
+        fclose(f);
+        if (read == 32) return 1;
+    }
+
+    // Generate new key
+    if (RAND_bytes(key, 32) != 1) return 0;
+
+    // Ensure directory exists
+    char dir[512];
+    strcpy(dir, path);
+    char* last_slash = strrchr(dir, '/');
+    if (last_slash) {
+        *last_slash = 0;
+        mkdir(dir, 0700); // Recursive creation could be added
+    }
+
+    f = fopen(path, "wb");
+    if (!f) return 0;
+    fwrite(key, 1, 32, f);
+    fclose(f);
+    chmod(path, 0600);
+    return 1;
+}
+
+// Protect: AES-256-GCM encrypt
 __attribute__((visibility("default")))
 int _cryptProtectData(const char* dataIn, int* sizeOut, char** dataOut) {
     if (!dataIn || !sizeOut || !dataOut) return 0;
 
-    size_t inLen = strlen(dataIn) + 1; // include terminating NUL in input length
-    // For "protected" data we'll produce binary data of same length (xor obfuscation)
-    char* buf = (char*)malloc(inLen);
-    if (!buf) return 0;
+    unsigned char key[32];
+    if (!load_or_generate_key(key)) return 0;
 
-    for (size_t i = 0; i < inLen; ++i) {
-        // XOR every byte including the terminating 0 so protected blob contains that byte
-        buf[i] = ((const unsigned char*)dataIn)[i] ^ 0xAA;
+    int inLen = (int)strlen(dataIn);
+    unsigned char iv[12];
+    if (RAND_bytes(iv, sizeof(iv)) != 1) return 0;
+
+    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+    if (!ctx) return 0;
+
+    if (EVP_EncryptInit_ex(ctx, EVP_aes_256_gcm(), NULL, NULL, NULL) != 1) {
+        EVP_CIPHER_CTX_free(ctx);
+        return 0;
     }
 
-    *dataOut = buf;
-    *sizeOut = (int)inLen;
+    if (EVP_EncryptInit_ex(ctx, NULL, NULL, key, iv) != 1) {
+        EVP_CIPHER_CTX_free(ctx);
+        return 0;
+    }
+
+    unsigned char* outBuf = (unsigned char*)malloc(sizeof(iv) + inLen + 16 + 16); // iv + ciphertext + tag
+    if (!outBuf) {
+        EVP_CIPHER_CTX_free(ctx);
+        return 0;
+    }
+
+    memcpy(outBuf, iv, sizeof(iv)); // prepend IV
+
+    int outLen = 0;
+    if (EVP_EncryptUpdate(ctx, outBuf + sizeof(iv), &outLen, (const unsigned char*)dataIn, inLen) != 1) {
+        free(outBuf);
+        EVP_CIPHER_CTX_free(ctx);
+        return 0;
+    }
+
+    int finalLen = 0;
+    if (EVP_EncryptFinal_ex(ctx, outBuf + sizeof(iv) + outLen, &finalLen) != 1) {
+        free(outBuf);
+        EVP_CIPHER_CTX_free(ctx);
+        return 0;
+    }
+
+    unsigned char tag[16];
+    if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, sizeof(tag), tag) != 1) {
+        free(outBuf);
+        EVP_CIPHER_CTX_free(ctx);
+        return 0;
+    }
+
+    memcpy(outBuf + sizeof(iv) + outLen + finalLen, tag, sizeof(tag)); // append tag
+
+    *sizeOut = sizeof(iv) + outLen + finalLen + sizeof(tag);
+    *dataOut = (char*)outBuf;
+
+    EVP_CIPHER_CTX_free(ctx);
     return 1;
 }
 
-// Unprotect: input binary buffer + length -> outputs C-string (NUL terminated)
-// int _cryptUnprotectData(const unsigned char* dataIn, int dataInLength, char** dataOut)
+// Unprotect: AES-256-GCM decrypt
 __attribute__((visibility("default")))
 int _cryptUnprotectData(const unsigned char* dataIn, int dataInLength, char** dataOut) {
-    if (!dataIn || dataInLength <= 0 || !dataOut) return 0;
+    if (!dataIn || !dataOut || dataInLength < 12 + 16) return 0;
 
-    // We will allocate size+1 to ensure a terminating NUL for Marshal.PtrToStringAnsi
-    char* out = (char*)malloc((size_t)dataInLength + 1);
-    if (!out) return 0;
+    unsigned char key[32];
+    if (!load_or_generate_key(key)) return 0;
 
-    for (int i = 0; i < dataInLength; ++i) {
-        out[i] = (char)(dataIn[i] ^ 0xAA);
+    const unsigned char* iv = dataIn;
+    const unsigned char* tag = dataIn + dataInLength - 16;
+    const unsigned char* ciphertext = dataIn + 12;
+    int ciphertextLen = dataInLength - 12 - 16;
+
+    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+    if (!ctx) return 0;
+
+    if (EVP_DecryptInit_ex(ctx, EVP_aes_256_gcm(), NULL, NULL, NULL) != 1) {
+        EVP_CIPHER_CTX_free(ctx);
+        return 0;
     }
-    // Ensure NUL termination
-    out[dataInLength] = '\0';
 
-    *dataOut = out;
+    if (EVP_DecryptInit_ex(ctx, NULL, NULL, key, iv) != 1) {
+        EVP_CIPHER_CTX_free(ctx);
+        return 0;
+    }
+
+    if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, 16, (void*)tag) != 1) {
+        EVP_CIPHER_CTX_free(ctx);
+        return 0;
+    }
+
+    char* outBuf = (char*)malloc(ciphertextLen + 1);
+    if (!outBuf) {
+        EVP_CIPHER_CTX_free(ctx);
+        return 0;
+    }
+
+    int outLen = 0;
+    if (EVP_DecryptUpdate(ctx, (unsigned char*)outBuf, &outLen, ciphertext, ciphertextLen) != 1) {
+        free(outBuf);
+        EVP_CIPHER_CTX_free(ctx);
+        return 0;
+    }
+
+    int finalLen = 0;
+    if (EVP_DecryptFinal_ex(ctx, (unsigned char*)outBuf + outLen, &finalLen) != 1) {
+        free(outBuf);
+        EVP_CIPHER_CTX_free(ctx);
+        return 0;
+    }
+
+    outBuf[outLen + finalLen] = '\0';
+    *dataOut = outBuf;
+
+    EVP_CIPHER_CTX_free(ctx);
     return 1;
-}
-
-// Helper to save a secret to a file
-__attribute__((visibility("default")))
-int save_secret(const char* path, const char* secret) {
-    if (!path || !secret) return 0;
-
-    char* protected_data = NULL;
-    int size = 0;
-    if (!_cryptProtectData(secret, &size, &protected_data)) return 0;
-
-    FILE* f = fopen(path, "wb");
-    if (!f) { free(protected_data); return 0; }
-
-    size_t written = fwrite(protected_data, 1, (size_t)size, f);
-    fclose(f);
-    free(protected_data);
-
-    return written == (size_t)size ? 1 : 0;
-}
-
-// Load file (protected) -> unprotected string (caller must free returned pointer)
-__attribute__((visibility("default")))
-int get_secret(const char* path, char** secretOut) {
-    if (!path || !secretOut) return 0;
-
-    FILE* f = fopen(path, "rb");
-    if (!f) return 0;
-
-    if (fseek(f, 0, SEEK_END) != 0) { fclose(f); return 0; }
-    long size = ftell(f);
-    rewind(f);
-
-    if (size <= 0) { fclose(f); return 0; }
-
-    unsigned char* data = (unsigned char*)malloc((size_t)size);
-    if (!data) { fclose(f); return 0; }
-
-    size_t r = fread(data, 1, (size_t)size, f);
-    fclose(f);
-
-    if (r != (size_t)size) { free(data); return 0; }
-
-    int ok = _cryptUnprotectData(data, (int)size, secretOut);
-    free(data);
-    return ok;
 }
 
 #ifdef __cplusplus
 }
 #endif
+
