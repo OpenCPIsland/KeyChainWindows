@@ -20,10 +20,19 @@ static void get_key_path(char* buf, size_t buf_size) {
     snprintf(buf, buf_size, "%s%s", home, KEY_FILE);
 }
 
-// Load or generate per-user key (32 bytes AES-256)
+// Load or generate per-user AES-256 key
 static int load_or_generate_key(unsigned char* key) {
     char path[512];
     get_key_path(path, sizeof(path));
+
+    // Ensure directory exists
+    char dir[512];
+    strcpy(dir, path);
+    char* last_slash = strrchr(dir, '/');
+    if (last_slash) {
+        *last_slash = 0;
+        mkdir(dir, 0700);
+    }
 
     FILE* f = fopen(path, "rb");
     if (f) {
@@ -35,15 +44,6 @@ static int load_or_generate_key(unsigned char* key) {
     // Generate new key
     if (RAND_bytes(key, 32) != 1) return 0;
 
-    // Ensure directory exists
-    char dir[512];
-    strcpy(dir, path);
-    char* last_slash = strrchr(dir, '/');
-    if (last_slash) {
-        *last_slash = 0;
-        mkdir(dir, 0700); // Recursive creation could be added
-    }
-
     f = fopen(path, "wb");
     if (!f) return 0;
     fwrite(key, 1, 32, f);
@@ -52,7 +52,7 @@ static int load_or_generate_key(unsigned char* key) {
     return 1;
 }
 
-// Protect: AES-256-GCM encrypt
+// Encrypt input string (includes terminating null)
 __attribute__((visibility("default")))
 int _cryptProtectData(const char* dataIn, int* sizeOut, char** dataOut) {
     if (!dataIn || !sizeOut || !dataOut) return 0;
@@ -60,7 +60,7 @@ int _cryptProtectData(const char* dataIn, int* sizeOut, char** dataOut) {
     unsigned char key[32];
     if (!load_or_generate_key(key)) return 0;
 
-    int inLen = (int)strlen(dataIn);
+    int inLen = (int)strlen(dataIn) + 1; // include terminating null
     unsigned char iv[12];
     if (RAND_bytes(iv, sizeof(iv)) != 1) return 0;
 
@@ -77,7 +77,7 @@ int _cryptProtectData(const char* dataIn, int* sizeOut, char** dataOut) {
         return 0;
     }
 
-    unsigned char* outBuf = (unsigned char*)malloc(sizeof(iv) + inLen + 16 + 16); // iv + ciphertext + tag
+    unsigned char* outBuf = (unsigned char*)malloc(sizeof(iv) + inLen + 16); // IV + ciphertext + tag
     if (!outBuf) {
         EVP_CIPHER_CTX_free(ctx);
         return 0;
@@ -115,10 +115,10 @@ int _cryptProtectData(const char* dataIn, int* sizeOut, char** dataOut) {
     return 1;
 }
 
-// Unprotect: AES-256-GCM decrypt
+// Decrypt buffer to original string (with null terminator)
 __attribute__((visibility("default")))
 int _cryptUnprotectData(const unsigned char* dataIn, int dataInLength, char** dataOut) {
-    if (!dataIn || !dataOut || dataInLength < 12 + 16) return 0;
+    if (!dataIn || !dataOut || dataInLength < 12 + 16) return 0; // IV + tag minimum
 
     unsigned char key[32];
     if (!load_or_generate_key(key)) return 0;
@@ -146,7 +146,7 @@ int _cryptUnprotectData(const unsigned char* dataIn, int dataInLength, char** da
         return 0;
     }
 
-    char* outBuf = (char*)malloc(ciphertextLen + 1);
+    char* outBuf = (char*)malloc(ciphertextLen + 1); // +1 for safety null
     if (!outBuf) {
         EVP_CIPHER_CTX_free(ctx);
         return 0;
@@ -166,7 +166,7 @@ int _cryptUnprotectData(const unsigned char* dataIn, int dataInLength, char** da
         return 0;
     }
 
-    outBuf[outLen + finalLen] = '\0';
+    outBuf[outLen + finalLen] = '\0'; // preserve terminating null
     *dataOut = outBuf;
 
     EVP_CIPHER_CTX_free(ctx);
@@ -176,4 +176,3 @@ int _cryptUnprotectData(const unsigned char* dataIn, int dataInLength, char** da
 #ifdef __cplusplus
 }
 #endif
-
